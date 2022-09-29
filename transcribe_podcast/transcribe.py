@@ -11,9 +11,10 @@ videos = glob.glob('videos/*')
 def run():
     for video in videos:
         result = model.transcribe(video)
-        basename = os.path.basename(video)
-        Path(f'output/{basename}').mkdir(parents=True, exist_ok=True)
+        audio_basename = os.path.basename(video)
+        Path(f'output/{audio_basename}').mkdir(parents=True, exist_ok=True)
 
-        pd.DataFrame(result['segments']).to_csv(f'output/{basename}/segments.csv')
-        with open(f'output/{basename}/text.txt', 'w', encoding="utf-8") as f:
+        pd.DataFrame(result['segments']).to_csv(f'output/{audio_basename}/segments.csv')
+
+        with open(f'output/{audio_basename}/text.txt', 'w', encoding="utf-8") as f:
             f.write(result['text'])
