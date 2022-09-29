@@ -3,7 +3,7 @@ import pandas as pd
 from yt_dlp import YoutubeDL
 
 
-def get(channel_id):
+def get(channel_id: str):
     playlist = Playlist(playlist_from_channel_id(channel_id))
 
     print(f'Videos Retrieved: {len(playlist.videos)}')
@@ -15,13 +15,13 @@ def get(channel_id):
 
     print('Found all the videos.')
 
-    data = pd.DataFrame(playlist.videos)
+    return pd.DataFrame(playlist.videos)
 
-    data.to_csv('playlist.csv', index=False)
+    # data.to_csv('playlist.csv', index=False)
 
 
-def download():
-    playlist = pd.read_csv('playlist.csv')
+def download(playlist: pd.DataFrame):
+    # playlist = pd.read_csv('playlist.csv')
 
     for i, video in playlist.iterrows():
         with YoutubeDL({'paths': {"home": "/videos"}}) as ydl:
