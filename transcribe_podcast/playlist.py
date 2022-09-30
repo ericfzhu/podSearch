@@ -21,8 +21,12 @@ def get(channel_id: str):
 
 
 def download(playlist: pd.DataFrame):
-    # playlist = pd.read_csv('playlist.csv')
+    playlist = playlist['link'].tolist()
 
-    for i, video in playlist.iterrows():
-        with YoutubeDL({'paths': {"home": "/videos"}}) as ydl:
-            ydl.download(video['link'])
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'paths': {"home": "/videos"}
+    }
+
+    with YoutubeDL(ydl_opts) as ydl:
+        ydl.download(playlist)
