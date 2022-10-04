@@ -1,4 +1,5 @@
 import argparse
+import os
 
 import torch.cuda
 
@@ -8,7 +9,7 @@ from transcribe_podcast import playlist, transcribe
 # data = playlist.get(channel_id)
 # playlist.download(data)
 
-transcribe.run()
+# transcribe.run()
 
 
 def cli():
@@ -17,12 +18,20 @@ def cli():
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu", help="Device to use for "
                                                                                                  "transcription")
     parser.add_argument("-v", "--verbose", type=bool, default=False, help="Print out progress and debug messages")
-    parser.add_argument("-o", "--output_dir")
+    parser.add_argument("-o", "--output_dir", type=str, default="/output", help="Directory to store output transcripts")
 
     args = parser.parse_args().__dict__
+    channel_id: str = args.pop("channel_id")
+    device: str = args.pop("device")
+    output_dir: str = args.pop("output_dir")
 
-    channel_id = args.pop("channel_id")
+    os.makedirs(output_dir, exist_ok=True)
+
     data = playlist.get(channel_id)
     playlist.download(data)
 
-    transcribe.run()
+    transcribe.run(device, output_dir)
+
+
+if __name__ == '__main__':
+    cli()
