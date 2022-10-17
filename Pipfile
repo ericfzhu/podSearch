@@ -3,8 +3,18 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
+[[source]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu113"
+verify_ssl = false
+
 [packages]
-whisper = "*"
+whisper = {git = "https://github.com/openai/whisper.git"}
+boto3 = "*"
+pandas = "*"
+youtube-search-python = "*"
+yt-dlp = "*"
+torch = {index = "pytorch", version = "*"}
 
 [dev-packages]
 

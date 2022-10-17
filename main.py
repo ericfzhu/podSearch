@@ -18,7 +18,7 @@ def cli():
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu", help="Device to use for "
                                                                                                  "transcription")
     parser.add_argument("-v", "--verbose", type=bool, default=False, help="Print out progress and debug messages")
-    parser.add_argument("-o", "--output_dir", type=str, default="/output", help="Directory to store output transcripts")
+    parser.add_argument("-o", "--output_dir", type=str, default="output", help="Directory to store output transcripts")
 
     args = parser.parse_args().__dict__
     channel_id: str = args.pop("channel_id")
@@ -27,8 +27,8 @@ def cli():
 
     os.makedirs(output_dir, exist_ok=True)
 
-    data = playlist.get(channel_id)
-    playlist.download(data)
+    # data = playlist.get(channel_id)
+    # playlist.download(data)
 
     transcribe.run(device, output_dir)
 
