@@ -15,6 +15,10 @@ pandas = "*"
 youtube-search-python = "*"
 yt-dlp = "*"
 torch = {index = "pytorch", version = "*"}
+validators = "*"
+requests = "*"
+jupyter = "*"
+feedparser = "*"
 
 [dev-packages]
 
