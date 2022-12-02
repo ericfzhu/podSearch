@@ -1,10 +1,12 @@
 import json
+from pathlib import Path
+
 import feedparser
 import pandas as pd
 import requests
-import validators
+import yt_dlp
+
 import utils
-import os
 
 
 def download_from_RSS(rss_url: str) -> None:
@@ -16,42 +18,55 @@ def download_from_RSS(rss_url: str) -> None:
     # Parse the RSS feed
     feed = feedparser.parse(rss_url)
 
-    # Create directory for feed if it doesn't already exist
+    # Create directory structure for feed if it doesn't already exist
     directory = utils.slugify(feed.feed.title)
-    os.makedirs(directory, exist_ok=True)
-    os.makedirs(f'{directory}/audio', exist_ok=True)
+    Path(f'data/{directory}').mkdir(parents=True, exist_ok=True)
+    Path(f'data/{directory}/audio').mkdir(exist_ok=True)
 
     # Compare metadata with previous revision
     data = pd.DataFrame(feed.entries)
-    if os.path.exists(f'{directory}/podcast.csv'):
-        prev_data = pd.read_csv(f'{directory}/podcast.csv')
+    if Path(f'data/{directory}/podcast.csv').exists():
+        prev_data = pd.read_csv(f'data/{directory}/podcast.csv')
         entries = pd.concat([data, prev_data]).drop_duplicates(keep=False)
+        entries['transcribed'] = False
+
+        # Replace data with previous metadata to preserve transcribed column
+        data = pd.concat([prev_data, entries], ignore_index=True)
     else:
+        data['transcribed'] = False
         entries = data
 
     # Save metadata to JSON and CSV files
-    data.to_csv(f'{directory}/podcast.csv', index=False)
-    with open(f'{directory}/feed.json', 'w') as f:
+    data.to_csv(f'data/{directory}/metadata.csv', index=False)
+    with open(f'data/{directory}/feed.json', 'w') as f:
         json.dump(feed.feed, f)
 
     # Download each podcast in the feed
-    for entry in entries:
+    for i, entry in entries.iterrows():
         # Get the podcast URL
-        podcast_url = next(x for x in entry['links'] if x['rel'] == 'enclosure').href
+        podcast_url = next(link for link in entry.links if link.rel == 'enclosure').href
 
         # Download the podcast
         response = requests.get(podcast_url)
 
         # Save the podcast to a file
         file_name = utils.slugify(entry.title)
-        with open(f'{directory}/audio/{file_name}.mp3', 'wb') as f:
+        with open(f'data/{directory}/audio/{file_name}.mp3', 'wb') as f:
             f.write(response.content)
 
 
-def download_from_YT(link: str):
+def download_from_YT(channel_url: str):
     """
     Download the YT video from the link
-    :param link:
+    :param channel_url:
     :return:
     """
-    assert (validators.url(link))
+    ydl_opts = {
+        'ignoreerrors': True,
+        'abort_on_unavailable_fragments': True,
+        'format': 'bestaudio/best',
+        'outtmpl': 'YTChannels\%(uploader)s\%(title)s ## %(uploader)s ## %(id)s.%(ext)s',
+        'ratelimit': 5000000,
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download(channel_url)
