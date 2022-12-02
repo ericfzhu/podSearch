@@ -3,7 +3,7 @@ import os
 
 import torch.cuda
 
-from transcribe_podcast import playlist, transcribe
+from modules import playlist, transcribe
 
 # channel_id = "UCESLZhusAkFfsNsApnjF_Cg"
 # data = playlist.get(channel_id)
