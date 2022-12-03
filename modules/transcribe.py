@@ -7,9 +7,9 @@ import whisper
 import utils
 
 
-def run(device: str):
+def run(device: str, model: utils.Model):
     # Load the Whisper model
-    model = whisper.load_model('medium', device=device)
+    model = whisper.load_model(model, device=device)
 
     # Iterate through all podcast directories
     directories = next(os.walk('data/.'))[1]
