@@ -19,10 +19,10 @@ def run(device: str, model: utils.Model):
         to_process = metadata[~metadata['transcribed']]
 
         for i, episode in to_process.iterrows():
+            file_name = utils.slugify(episode.title)
+            audio_path = f'data/{directory}/audio/{file_name}.mp3'
             try:
                 # Try to transcribe the episode audio file and write the transcript to a file
-                file_name = utils.slugify(episode.title)
-                audio_path = f'data/{directory}/audio/{file_name}.mp3'
                 result = model.transcribe(audio_path, verbose=False)
                 pd.DataFrame(result.segments).to_csv(f'data/{directory}/transcriptions/{file_name}.csv', index=False)
                 with open(f'data/{directory}/transcriptions/{file_name}.txt', 'w') as f:
@@ -31,8 +31,14 @@ def run(device: str, model: utils.Model):
                 # Update the original metadata file once the episode is transcribed
                 metadata.loc[i, 'transcribed'] = True
 
+            except FileNotFoundError:
+                logging.error(f'File not found: {audio_path}')
+
             except:
-                logging.warning(f'Unable to process transcription for episode: {episode.title}')
+                logging.error(f'Unable to process transcription for episode: {episode.title}')
 
         # Save the updated metadata file
         metadata.to_csv(f'data/{directory}/metadata.csv', index=False)
+        logging.info(f'Finished transcription for {directory}')
+
+    logging.info('Finished transcriptions for all podcasts')
